@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "744139225215",
+    "project_id": "puk9-15188",
+    "storage_bucket": "puk9-15188.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744139225215:android:6a742fcef85c26eb0be74a",
+        "android_client_info": {
+          "package_name": "com.example.puklicenta9"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0M5eTGDfkH3AFAqJ-bvwbykeX_0KvV3g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
