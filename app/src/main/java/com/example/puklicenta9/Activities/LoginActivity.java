@@ -5,10 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.puklicenta9.R;
 import com.google.firebase.database.DataSnapshot;
@@ -39,10 +41,10 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!validateUsername() | !validatePassword()) {
-
-                } else {
+                if (validateUsername() && validatePassword()) {
                     checkUser();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Something went wrong!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -80,7 +82,59 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-    public void checkUser(){
+//    public void checkUser(){
+//        String userUsername = loginUsername.getText().toString().trim();
+//        String userPassword = loginPassword.getText().toString().trim();
+//
+//        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
+//        Query checkUserDatabase = reference.orderByChild("username").equalTo(userUsername);
+//
+//        checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//
+//                if (snapshot.exists()){
+//
+//                    loginUsername.setError(null);
+//                    String passwordFromDB = snapshot.child(userUsername).child("password").getValue(String.class);
+//
+//                    if (passwordFromDB != null && passwordFromDB.equals(userPassword)) {
+//                        loginUsername.setError(null);
+//
+//                        Toast.makeText(LoginActivity.this, "Password matches!", Toast.LENGTH_SHORT).show();
+//
+//
+//                        String nameFromDB = snapshot.child(userUsername).child("name").getValue(String.class);
+//                        String emailFromDB = snapshot.child(userUsername).child("email").getValue(String.class);
+//                        String usernameFromDB = snapshot.child(userUsername).child("username").getValue(String.class);
+//
+//                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+////
+////                        intent.putExtra("name", nameFromDB);
+////                        intent.putExtra("email", emailFromDB);
+////                        intent.putExtra("username", usernameFromDB);
+////                        intent.putExtra("password", passwordFromDB);
+//
+//                        startActivity(intent);
+//                    } else {
+//                        loginPassword.setError("Invalid Credentials");
+//                        loginPassword.requestFocus();
+//                    }
+//                } else {
+//                    loginUsername.setError("User does not exist");
+//                    loginUsername.requestFocus();
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+//    }
+
+
+    public void checkUser() {
         String userUsername = loginUsername.getText().toString().trim();
         String userPassword = loginPassword.getText().toString().trim();
 
@@ -90,30 +144,49 @@ public class LoginActivity extends AppCompatActivity {
         checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if (snapshot.exists()){
-
+                if (snapshot.exists()) {
                     loginUsername.setError(null);
-                    String passwordFromDB = snapshot.child(userUsername).child("password").getValue(String.class);
+                    DataSnapshot userSnapshot = null;
 
-                    if (passwordFromDB.equals(userPassword)) {
-                        loginUsername.setError(null);
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        if (Objects.equals(child.child("username").getValue(String.class), userUsername)) {
+                            userSnapshot = child;
+                            break;
+                        }
+                    }
 
-                        String nameFromDB = snapshot.child(userUsername).child("name").getValue(String.class);
-                        String emailFromDB = snapshot.child(userUsername).child("email").getValue(String.class);
-                        String usernameFromDB = snapshot.child(userUsername).child("username").getValue(String.class);
+                    if (userSnapshot != null) {
+                        String passwordFromDB = userSnapshot.child("password").getValue(String.class);
+                        Log.d("LoginActivity", "Password from DB: " + passwordFromDB);
 
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        if (passwordFromDB != null && passwordFromDB.equals(userPassword)) {
+                            loginUsername.setError(null);
 
-                        intent.putExtra("name", nameFromDB);
-                        intent.putExtra("email", emailFromDB);
-                        intent.putExtra("username", usernameFromDB);
-                        intent.putExtra("password", passwordFromDB);
+                            String nameFromDB = userSnapshot.child("name").getValue(String.class);
+                            String emailFromDB = userSnapshot.child("email").getValue(String.class);
+                            String usernameFromDB = userSnapshot.child("username").getValue(String.class);
 
-                        startActivity(intent);
+                            Log.d("LoginActivity", "User details from DB: name=" + nameFromDB + ", email=" + emailFromDB + ", username=" + usernameFromDB);
+
+                            if (nameFromDB != null && emailFromDB != null && usernameFromDB != null) {
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                intent.putExtra("name", nameFromDB);
+                                intent.putExtra("email", emailFromDB);
+                                intent.putExtra("username", usernameFromDB);
+                                intent.putExtra("password", passwordFromDB);
+
+                                startActivity(intent);
+                            } else {
+                                Log.e("LoginActivity", "One of the values from the database is null");
+                                Toast.makeText(LoginActivity.this, "Database error. Try again.", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            loginPassword.setError("Invalid Credentials");
+                            loginPassword.requestFocus();
+                        }
                     } else {
-                        loginPassword.setError("Invalid Credentials");
-                        loginPassword.requestFocus();
+                        loginUsername.setError("User not found in snapshot");
+                        loginUsername.requestFocus();
                     }
                 } else {
                     loginUsername.setError("User does not exist");
@@ -123,8 +196,9 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Log.e("LoginActivity", "Database error: " + error.getMessage());
             }
         });
     }
+
 }

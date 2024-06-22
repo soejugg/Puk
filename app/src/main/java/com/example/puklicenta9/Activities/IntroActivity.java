@@ -18,7 +18,7 @@ public class IntroActivity extends AppCompatActivity {
         binding = ActivityIntroBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.startBtn.setOnClickListener(v -> startActivity(new Intent(IntroActivity.this, MainActivity.class)));
+        binding.startBtn.setOnClickListener(v -> startActivity(new Intent(IntroActivity.this, LoginActivity.class)));
         EdgeToEdge.enable(this);
 
         Window w=getWindow();

@@ -4,6 +4,9 @@ public class HelperClass {
 
     String name, email, username, password;
 
+    public HelperClass() {
+    }
+
     public String getName() {
         return name;
     }
@@ -43,6 +46,4 @@ public class HelperClass {
         this.password = password;
     }
 
-    public HelperClass() {
-    }
 }
